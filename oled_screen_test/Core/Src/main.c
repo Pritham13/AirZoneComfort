@@ -98,9 +98,9 @@ int main(void)
   /// lets print some string
 
     SSD1306_GotoXY (0,0);
-    SSD1306_Puts ("HELLO", &Font_11x18, 1);
-    SSD1306_GotoXY (10, 30);
-    SSD1306_Puts ("  WORLD :)", &Font_11x18, 1);
+    SSD1306_Puts ("Start", &Font_16x26, 1);
+    // SSD1306_GotoXY (10, 30);
+    // SSD1306_Puts ("", &Font_7x10, 1);
     SSD1306_UpdateScreen(); //display
 
     HAL_Delay (2000);

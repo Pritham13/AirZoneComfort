@@ -22,7 +22,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "bmp280.h"
+#include "dht11.h"
+#include "ssd1306.h"
+#include "fonts.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -80,7 +84,11 @@ void temp_data_collect_init(void const * argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void Delay_Us(uint32_t us)
+{
+    uint32_t startTick = __HAL_TIM_GET_COUNTER(&htim2);
+    while ((__HAL_TIM_GET_COUNTER(&htim2) - startTick) < us);
+}
 /* USER CODE END 0 */
 
 /**
@@ -137,11 +145,11 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of pressure_data_c */
-  osThreadDef(pressure_data_c, pressure_data_c_init, osPriorityNormal, 0, 128);
+  osThreadDef(pressure_data_c, pressure_data_c_init, osPriorityBelowNormal, 0, 128);
   pressure_data_cHandle = osThreadCreate(osThread(pressure_data_c), NULL);
 
   /* definition and creation of temp_data_colle */
-  osThreadDef(temp_data_colle, temp_data_collect_init, osPriorityAboveNormal, 0, 128);
+  osThreadDef(temp_data_colle, temp_data_collect_init, osPriorityNormal, 0, 128);
   temp_data_colleHandle = osThreadCreate(osThread(temp_data_colle), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -296,9 +304,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
+  htim2.Init.Prescaler = 84-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4294967295;
+  htim2.Init.Period = 4294967295-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -398,22 +406,37 @@ static void MX_GPIO_Init(void)
 void pressure_data_c_init(void const * argument)
 {
   /* USER CODE BEGIN 5 */
-	bmp280.addr = BMP280_I2C_ADDRESS_0;
-	bmp280.i2c = &hi2c1;
+//	bmp280.addr = BMP280_I2C_ADDRESS_0;
+//	bmp280.i2c = &hi2c1;
+	SSD1306_Init();
+//	BMP280_Init_Default_Params(&bmp280.params);
+//	BMP280_Init(&bmp280, &bmp280.params);
 
-	BMP280_Init_Default_Params(&bmp280.params);
-	BMP280_Init(&bmp280, &bmp280.params);
-
+	char display_buffer[128];
   /* Infinite loop */
   for(;;)
   {
 	  HAL_StatusTypeDef bmp280Status;
 	  bmp280Status = !BMP280_Read_Float(&bmp280, &Telemetry.temperature, &Telemetry.pressure, &Telemetry.altitude);
-	  if ( bmp280Status == HAL_OK)
-	          {
-//              print the values in oled screen
-	          }
-	  osDelay(1);
+//	  if ( bmp280Status == HAL_OK)
+//		{
+			sprintf(display_buffer, "Temp: %.2f C",24.00);
+			SSD1306_GotoXY(0, 0);
+			SSD1306_Puts(display_buffer, &Font_7x10, SSD1306_COLOR_WHITE);
+			SSD1306_UpdateScreen();
+
+			sprintf(display_buffer, "Pressure: %.2f hPa", Telemetry.pressure);
+			SSD1306_GotoXY(0, 24);
+			SSD1306_Puts(display_buffer, &Font_7x10, SSD1306_COLOR_WHITE);
+			SSD1306_UpdateScreen();
+
+			sprintf(display_buffer, "Altitude: %.2f m", Telemetry.altitude);
+			SSD1306_GotoXY(0, 36);
+			SSD1306_Puts(display_buffer, &Font_7x10, SSD1306_COLOR_WHITE);
+
+			SSD1306_UpdateScreen();
+//		}
+	  osDelay(500);
   }
   /* USER CODE END 5 */
 }
@@ -428,21 +451,32 @@ void pressure_data_c_init(void const * argument)
 void temp_data_collect_init(void const * argument)
 {
   /* USER CODE BEGIN temp_data_collect_init */
-	HAL_TIM_Base_Start(&htim1);
-	DHT11_Init(&dht, &htim1, GPIOA, GPIO_PIN_0);
+	//only to collect humidity data
+	HAL_TIM_Base_Start(&htim2);
+	DHT11_Init(&dht, &htim2, GPIOA, GPIO_PIN_0);
+	char display_buffer_h[128];
+	 SSD1306_Init();
   /* Infinite loop */
   for(;;)
   {
 	HAL_StatusTypeDef  dht11Status;
 	dht11Status = DHT11_Read(&dht);
+	Telemetry.humidity = dht.humidity;
 	if ( dht11Status == HAL_OK)
-		          {
-	//              print the values in oled screen
-		          }
+	  {
+
+
+		sprintf(display_buffer_h, "Humidity: %d %%", Telemetry.humidity);
+		SSD1306_GotoXY(0, 24);
+		SSD1306_Puts(display_buffer_h, &Font_7x10, SSD1306_COLOR_WHITE);
+		SSD1306_UpdateScreen();
+
+	//  print the values in oled screen
+	  }
 
 
 
-    osDelay(1);
+    osDelay(700);
   }
   /* USER CODE END temp_data_collect_init */
 }
