@@ -58,6 +58,10 @@ typedef struct TelemteryData
     float pressure;
     uint8_t humidity;
 } TelemteryData;
+
+TelemteryData Telemetry;
+BMP280_HandleTypedef bmp280;
+dht11_t dht;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -403,7 +407,13 @@ void pressure_data_c_init(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  HAL_StatusTypeDef bmp280Status;
+	  bmp280Status = !BMP280_Read_Float(&bmp280, &Telemetry.temperature, &Telemetry.pressure, &Telemetry.altitude);
+	  if ( bmp280Status == HAL_OK)
+	          {
+//              print the values in oled screen
+	          }
+	  osDelay(1);
   }
   /* USER CODE END 5 */
 }
@@ -424,6 +434,13 @@ void temp_data_collect_init(void const * argument)
   for(;;)
   {
 	HAL_StatusTypeDef  dht11Status;
+	dht11Status = DHT11_Read(&dht);
+	if ( dht11Status == HAL_OK)
+		          {
+	//              print the values in oled screen
+		          }
+
+
 
     osDelay(1);
   }
