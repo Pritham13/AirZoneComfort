@@ -470,6 +470,7 @@ void temp_data_collect_init(void const * argument)
 		SSD1306_GotoXY(0, 24);
 		SSD1306_Puts(display_buffer_h, &Font_7x10, SSD1306_COLOR_WHITE);
 		SSD1306_UpdateScreen();
+    HAL_UART_Transmit(huart2,Telemetry,);//// needs to be completed ( array size needs to be determined )
 
 	//  print the values in oled screen
 	  }
