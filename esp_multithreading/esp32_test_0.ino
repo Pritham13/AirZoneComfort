@@ -61,8 +61,6 @@ void Task_hum_temp_read(void *pvParameters){
         data_arquired.humidity = dht.readHumidity();
         data_arquired.temperature = bmp.readTemperature();
         data_arquired.altitude = bmp.readAltitude();
-
-
         
     }
 }
@@ -95,7 +93,7 @@ void Task_value_display(void *pvParameters){
 
         oled.display();
 
-        delay(2000); // Adjust delay as needed
+        vTickDelay(2000); // Adjust delay as needed
         
     }
 }
