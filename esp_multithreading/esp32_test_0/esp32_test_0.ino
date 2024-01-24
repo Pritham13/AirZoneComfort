@@ -52,7 +52,7 @@ void setup() {
                     "Sending_the_value_to_the_ML_model",
                     129,
                     NULL,
-                    2,
+                    3,
                     NULL);
     }
 }
