@@ -7,6 +7,8 @@ const char* password = "51121921";
 
 AsyncWebServer server(80);
 
+String dataToSend = "gae"; // Global variable to store data to send
+
 void setup() {
   Serial.begin(115200);
 
@@ -23,10 +25,13 @@ void setup() {
   server.on("/handle_post", HTTP_POST, [](AsyncWebServerRequest *request){
     String message;
     if (request->hasParam("message", true)) {
-      message = request->getParam("message", true)->value();//stores the recived data 
+      message = request->getParam("message", true)->value();
       Serial.println("Received message: " + message);
+      
+      // Store the received message in the global variable
+      dataToSend = "Received message: " + message;
     }
-    request->send(200, "text/plain", "Message received successfully");//sends data to the client 
+    request->send(200, "text/plain", "Message received successfully");
   });
 
   // Start the server
@@ -34,5 +39,15 @@ void setup() {
 }
 
 void loop() {
-  // Nothing to do here
+  // Check if there is data to send
+  if (!dataToSend.isEmpty()) {
+    // Send data to the client
+    server.clients().send(dataToSend.c_str());
+    
+    // Clear the dataToSend variable
+    dataToSend = "";
+  }
+
+  // Your other loop code goes here
 }
+
