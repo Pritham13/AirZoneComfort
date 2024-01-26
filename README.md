@@ -30,4 +30,4 @@
 
 ---
 
-*This architecture document provides technical insights into the components and flow of an Intelligent Fan Control System, highlighting sensor specifications, communication protocols, data processing, machine learning techniques, and fan control mechanisms for effective environmental regulation.*
+*This architecture document provides technical insights into the components and flow of an Intelligent Fan Control System, highlighting sensor specifications, communication protocols, data processing methods, machine learning techniques, and fan control mechanisms for effective environmental regulation. Machine learning plays a crucial role in predicting optimal fan speed based on environmental data, enhancing the system's efficiency and adaptability.* 
