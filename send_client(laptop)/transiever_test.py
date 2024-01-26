@@ -1,6 +1,6 @@
 import requests
 
-url = 'http://10.10.0.2/handle_post'
+url = 'http://192.168.0.110/handle_post'
 
 # Replace 'your_variable_value' with the actual value of your variable
 x = 'hello world'
