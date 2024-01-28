@@ -43,7 +43,7 @@ void setup() {
                     "collection_of_humidity_and_temperature_data",
                     2048,
                     NULL,
-                    1,
+                    3,
                     NULL);
         xTaskCreate(Task_value_display,
                     "displaying_of_the_collected_values",
@@ -52,15 +52,17 @@ void setup() {
                     2,
                     NULL);
         xTaskCreate(Task_data_transmit,
-                    "Sending_the_value_to_the_ML_model",
+                    "Sending the value to the ML model",
                     2048,
                     NULL,
-                    3,
+                    1,
                     NULL);
     }
 }
 
-void loop() {}
+void loop() {
+  Serial.println("hello im void loop");
+}
 
 void Task_hum_temp_read(void *pvParameters) {
     (void)pvParameters;
@@ -77,16 +79,16 @@ void Task_hum_temp_read(void *pvParameters) {
         data_acquired.altitude = 11;
         count++;
         Serial.println("pre send");
-        // Serial.println("+++++++++++++++++++++++++");
-        // Serial.println("Humidity: " + String(data_acquired.humidity) + " %");
-        // Serial.println("Temperature: " + String(data_acquired.temperature) + " C");
-        // Serial.println("Pressure: " + String(data_acquired.pressure) + " hPa");
-        // Serial.println("Altitude: " + String(data_acquired.altitude) + " m");
-        // Serial.println("+++++++++++++++++++++++++");
+        Serial.println("+++++++++++++++++++++++++");
+        Serial.println("Humidity: " + String(data_acquired.humidity) + " %");
+        Serial.println("Temperature: " + String(data_acquired.temperature) + " C");
+        Serial.println("Pressure: " + String(data_acquired.pressure) + " hPa");
+        Serial.println("Altitude: " + String(data_acquired.altitude) + " m");
+        Serial.println("+++++++++++++++++++++++++");
         // Send data to the queue
         xQueueSend(telemetry_queue, &data_acquired, portMAX_DELAY);
 
-        vTaskDelay(600 / portTICK_PERIOD_MS); 
+        vTaskDelay(100 / portTICK_PERIOD_MS); 
     }
 }
 
@@ -119,10 +121,10 @@ void Task_data_transmit(void *pvParameters) {
 
         // Receive data from the queue
         if (xQueueReceive(telemetry_queue, &data_acquired, portMAX_DELAY)) {
-            // Do something with the data (transmit to ML model)
+            // Do something with the data (transmit to ML model)//data may be empty
             Serial.println("Task_data_tranmsmit check");
         }
 
-        vTaskDelay(600 / portTICK_PERIOD_MS); 
+        vTaskDelay(100 / portTICK_PERIOD_MS); 
     }
 }
