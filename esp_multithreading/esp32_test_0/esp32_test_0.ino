@@ -72,12 +72,9 @@ void Task_hum_temp_read(void *pvParameters) {
           count =25;
         }
         TelemetryData data_acquired;
-        // data_acquired.humidity = dht.readHumidity();
-        // data_acquired.temperature = bmp.readTemperature();
-        // data_acquired.altitude = bmp.readAltitude();
-        data_acquired.humidity = (count +1)*10;
-        data_acquired.temperature = count+1
-        data_acquired.altitude = 10
+        data_acquired.humidity = dht.readHumidity();
+        data_acquired.temperature = bmp.readTemperature();
+        data_acquired.altitude = bmp.readAltitude();
 
         // Send data to the queue
         xQueueSend(telemetry_queue, &data_acquired, portMAX_DELAY);
