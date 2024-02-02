@@ -1,0 +1,47 @@
+import pandas as pd
+import tensorflow as tf
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+# Load the dataset
+dataset_path = "dataset.csv"
+df = pd.read_csv(dataset_path)
+
+# Scale the features
+scaler = MinMaxScaler()
+scaled_features = scaler.fit_transform(df[['month', 'day', 'time', 'humidity', 'tempC']])
+
+# Split the data into features and target
+X = scaled_features
+y = df['fan_speed'].values
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# Define the TensorFlow model
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(50, activation='relu', input_shape=(5,)),
+    tf.keras.layers.Dense(50, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')  # Sigmoid activation for binary classification
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+history = model.fit(X_train, y_train, epochs=5, batch_size=32, validation_split=0.2)
+
+# Evaluate the model on the test set
+test_loss, test_accuracy = model.evaluate(X_test, y_test)
+print("Test Loss:", test_loss)
+print("Test Accuracy:", test_accuracy)
+
+# Convert predictions to binary classes based on a threshold
+threshold = 0.5
+predicted_classes = (model.predict(X_test) >= threshold).astype(int)
+true_classes = (y_test >= threshold).astype(int)
+
+# Calculate accuracy
+accuracy = np.mean(predicted_classes == true_classes)
+print("Test Accuracy (Threshold):", accuracy)
