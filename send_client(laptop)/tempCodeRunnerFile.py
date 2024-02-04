@@ -3,7 +3,7 @@ import websockets
 
 # WebSocket server URL
 # WebSocket server URL
-ws_url = "ws://192.168.0.110/ws"
+ws_url = "ws://192.168.109.2/ws"
 
 
 # Global variables to store data

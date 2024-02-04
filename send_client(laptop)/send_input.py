@@ -2,7 +2,7 @@ import asyncio
 import websockets
 
 # WebSocket server URL
-ws_url = "ws://192.168.0.101/ws"
+ws_url = "ws://192.168.109.2/ws"
 
 # Function to handle incoming messages
 async def message_handler(websocket):
