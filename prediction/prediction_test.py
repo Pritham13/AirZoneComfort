@@ -20,11 +20,11 @@ def predict_fan_speed(manual_values):
     return predicted_class
 
 manual_values = {
-    'month': 6,  # Example month value
-    'day': 15,   # Example day value
-    'time': 12,  # Example time value
-    'humidity': 80,  # Example humidity value
-    'tempC': 25   # Example temperature value
+    'month': 6,  
+    'day': 15,   
+    'time': 12,  
+    'humidity': 80,  
+    'tempC': 25   
 }
 
 predicted_fan_speed = predict_fan_speed(manual_values)
