@@ -3,8 +3,7 @@ import pandas as pd
 import tensorflow as tf
 
 def predict_fan_speed(manual_values):
-    model = tf.keras.models.load_model('model.h5')
-
+    model = tf.keras.models.load_model('C:/Users/prit4/OneDrive/Desktop/stuff/active_Github_repos/Mini_project/Training/model.h5')
     scaled_features = pd.DataFrame({
         'month': [manual_values['month'] / 12],
         'day': [manual_values['day'] / 31],
@@ -24,7 +23,7 @@ manual_values = {
     'day': 15,   
     'time': 12,  
     'humidity': 80,  
-    'tempC': 25   
+    'tempC': 40   
 }
 
 predicted_fan_speed = predict_fan_speed(manual_values)

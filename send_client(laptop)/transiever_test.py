@@ -16,7 +16,7 @@ async def receive_and_send_data(uri):
             print(f"Sent processed data: {processed_data}")
 
             # Wait for 10 minutes before receiving data again
-            await asyncio.sleep(600)  # 600 seconds = 10 minutes
+            await asyncio.sleep(3600)  # 600 seconds = 10 minutes
 
 async def main():
     # Replace 'ws://your.esp32.server.ip:port' with the actual WebSocket server URI
