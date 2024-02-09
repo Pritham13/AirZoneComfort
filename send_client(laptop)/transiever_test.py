@@ -7,6 +7,13 @@ async def receive_and_send_data(uri):
             # Receive data from the server
             received_data = await websocket.recv()
             print(f"Received data: {received_data}")
+            print(f"Received data: {received_data}")
+
+            # Process the received data
+            data = received_data.split(',')
+            temperature = float(data[0])
+            humidity = int(data[1])
+            print(f"Temperature: {temperature}, Humidity: {humidity}")
 
             # Process the received data (Replace this with your processing logic)
             processed_data = received_data.upper()

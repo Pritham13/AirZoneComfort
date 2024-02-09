@@ -125,9 +125,20 @@ void Task_data_transmit(void *pvParameters) {
     (void)pvParameters;
     for (;;) {
         TelemetryData data_acquired;
-
+        char temperatureStr[10];
+        char altitudeStr[10];
+        dtostrf(data_acquired.altitude, 4, 1, altitudeStr);
+        char pressureStr[10];
+        char humidityStr[4];
+        char dataToSend[50];
+        
         // Receive data from the queue
         if (xQueueReceive(telemetry_queue, &data_acquired, portMAX_DELAY)) {
+            dtostrf(data_acquired.pressure, 2, 0, pressureStr);
+            dtostrf(data_acquired.temperature, 3, 1, temperatureStr);
+            sprintf(humidityStr, "%02d", data_acquired.humidity);
+            // Concatenate data strings
+            snprintf(dataToSend, sizeof(dataToSend), temperatureStr, humidityStr);
         }
 
         vTaskDelay(pdMS_TO_TICKS(5000)); 

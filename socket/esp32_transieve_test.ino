@@ -8,7 +8,8 @@ const char* password = "51121921";
 AsyncWebServer server(80);
 
 String dataToSend = "gae"; // Global variable to store data to send
-
+char humidityStr[4];
+char temperatureStr[10];
 void setup() {
   Serial.begin(115200);
 
