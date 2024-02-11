@@ -1,5 +1,5 @@
-#include <Arduino_FreeRTOS.h>
-#include <queue.h>
+// #include <Arduino_FreeRTOS.h>
+// #include <queue.h>
 #include "DHT.h"
 #include <Wire.h>
 #include <Adafruit_BMP085.h>
@@ -15,12 +15,24 @@ Adafruit_BMP085 bmp;
 #define DHTTYPE DHT11
 #define SCREEN_WIDTH 128 // OLED display width,  in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
-const char* ssid = "TP-Link_BBF8";
-const char* password = "51121921";
-int fanspeed = 0;
+#define rmf 12
+#define rmb 13
+#define en 5
+const char* ssid = "Nope";
+const char* password = "pi314420";
+#define seaLevelPressure_hPa 1013.25
+int fanSpeed = 0;
+int flag=0;
+DHT dht(DHTPIN, DHTTYPE);
+
+
 // declare an SSD1306 display object connected to I2C
-Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+// Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire, -1);
+
 AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
+AsyncWebSocketClient *connectedClient = NULL;
 // defining struct
 typedef struct TelemetryData
 {
@@ -29,6 +41,39 @@ typedef struct TelemetryData
     float pressure;
     uint8_t humidity;
 } TelemetryData;
+//fuctions
+void fanSpeed_set(int speed){
+    analogWrite(en, speed*0.1*255);
+    digitalWrite(rmf, LOW);
+    digitalWrite(rmb, HIGH);
+}
+void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  if (type == WS_EVT_CONNECT) {
+    Serial.println("WebSocket client connected");
+    connectedClient = client;
+      int coreId = xPortGetCoreID();
+    Serial.printf("line on core %d\n", coreId);
+
+
+    // Send initial data to the client when connected
+    if (connectedClient != NULL) {
+      // connectedClient->text("Initial data from ESP32!");
+      flag=1;
+    }
+  } else if (type == WS_EVT_DISCONNECT) {
+    Serial.println("WebSocket client disconnected");
+    flag=0;
+    connectedClient = NULL;
+  } else if (type == WS_EVT_DATA) {
+    Serial.print("Received data from client:");
+    for (size_t i = 0; i < len; i++) {
+      Serial.print((char)data[i]);
+    }
+    Serial.println();
+
+    // Process the received data here if needed
+  }
+}
 
 // declaring struct queue
 QueueHandle_t telemetry_send_queue,telemetry_disp_queue,fanSpeed_queue;
@@ -42,16 +87,23 @@ void setup() {
     }
     Serial.println("Connected to WiFi");
     Serial.println(WiFi.localIP());
-    
-    if (!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-        Serial.println(F("SSD1306 allocation failed"));
+    ws.onEvent(onWsEvent);
+    server.addHandler(&ws);
+    // Start the server
+    server.begin();
+
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  
+    if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+      Serial.println(F("SSD1306 allocation failed"));
     }
+    display.clearDisplay();
+    display.setTextColor(WHITE);
 
     telemetry_disp_queue = xQueueCreate(1, sizeof(TelemetryData));
     telemetry_send_queue = xQueueCreate(1, sizeof(TelemetryData));
-    fanSpeed_queue = xQueueCreate(1, sizeof(fanspeed));
+    fanSpeed_queue = xQueueCreate(1, sizeof(fanSpeed));
 
-    if (telemetry_queue != NULL) {
+    if (telemetry_disp_queue != NULL&& telemetry_send_queue != NULL) {
         xTaskCreatePinnedToCore(Task_hum_temp_read,
                     "to collect the temperature and humidity values",
                     4096,
@@ -98,8 +150,7 @@ void Task_value_display(void *pvParameters) {
     (void)pvParameters;
     for (;;) {
         TelemetryData data_acquired;
-        if (xQueueReceive(fanSpeed_queue, &fanspeed, portMAX_DELAY)) 
-            fanSpeed
+        xQueueReceive(fanSpeed_queue, &fanSpeed, portMAX_DELAY);
         // Receive data from the queue
         if (xQueueReceive(telemetry_disp_queue, &data_acquired, portMAX_DELAY)) {
             display.setTextSize(1);
