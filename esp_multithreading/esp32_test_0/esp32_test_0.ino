@@ -127,7 +127,6 @@ void Task_data_transmit(void *pvParameters) {
         TelemetryData data_acquired;
         char temperatureStr[10];
         char altitudeStr[10];
-        dtostrf(data_acquired.altitude, 4, 1, altitudeStr);
         char pressureStr[10];
         char humidityStr[4];
         char dataToSend[50];
