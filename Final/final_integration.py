@@ -10,6 +10,8 @@ import torch.nn.functional as F
 from sklearn.model_selection import train_test_split
 import asyncio
 import websockets
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' 
 
 def predict_fan_speed(manual_values):
     model = tf.keras.models.load_model('C:/Users/prit4/OneDrive/Desktop/stuff/active_Github_repos/Mini_project/Training/model.h5')
