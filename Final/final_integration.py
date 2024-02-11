@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 import torch
@@ -9,6 +10,7 @@ import torch.nn.functional as F
 from sklearn.model_selection import train_test_split
 import asyncio
 import websockets
+
 def predict_fan_speed(manual_values):
     model = tf.keras.models.load_model('C:/Users/prit4/OneDrive/Desktop/stuff/active_Github_repos/Mini_project/Training/model.h5')
     scaled_features = pd.DataFrame({
@@ -30,20 +32,44 @@ async def receive_and_send_data(uri):
             # Receive data from the server
             received_data = await websocket.recv()
             print(f"Received data: {received_data}")
+            # print(f"Received data: {received_data}")
+
+            # Process the received data
+            # data = received_data.split(',')
+            temperature = float(received_data[:4])
+            humidity = int(received_data[4:])
+            print(f"Temperature: {temperature}, Humidity: {humidity}")
+            current_datetime = datetime.datetime.now()
+
+            day = current_datetime.day
+            month = current_datetime.month
+            hour = current_datetime.hour
+            manual_values = {
+                            'month': month,  
+                            'day': day,   
+                            'time': hour,  
+                            'humidity': humidity,  
+                            'tempC': temperature   
+                        }
+
 
             # Process the received data (Replace this with your processing logic)
-            processed_data = received_data.upper()
+            processed_data = predict_fan_speed(manual_values)
 
             # Send the processed data back to the server
-            await websocket.send(processed_data)
+            await websocket.send(str(processed_data))
             print(f"Sent processed data: {processed_data}")
 
             # Wait for 10 minutes before receiving data again
-            await asyncio.sleep(3600)  # 600 seconds = 10 minutes
+            await asyncio.sleep(10)  # 600 seconds = 10 minutes
+
 async def main():
     # Replace 'ws://your.esp32.server.ip:port' with the actual WebSocket server URI
-    server_uri = "ws://your.esp32.server.ip:port"
+    server_uri = "ws://192.168.0.110/ws"
     
-    await receive_and_send_data(server_uri)
+    while True:
+        await receive_and_send_data(server_uri)
+        await asyncio.sleep(10)
+
 if __name__ == "__main__":
     asyncio.run(main())

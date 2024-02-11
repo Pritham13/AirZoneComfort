@@ -7,12 +7,12 @@ async def receive_and_send_data(uri):
             # Receive data from the server
             received_data = await websocket.recv()
             print(f"Received data: {received_data}")
-            print(f"Received data: {received_data}")
+            # print(f"Received data: {received_data}")
 
             # Process the received data
-            data = received_data.split(',')
-            temperature = float(data[0])
-            humidity = int(data[1])
+            # data = received_data.split(',')
+            temperature = float(received_data[:4])
+            humidity = int(received_data[4:])
             print(f"Temperature: {temperature}, Humidity: {humidity}")
 
             # Process the received data (Replace this with your processing logic)
@@ -27,7 +27,7 @@ async def receive_and_send_data(uri):
 
 async def main():
     # Replace 'ws://your.esp32.server.ip:port' with the actual WebSocket server URI
-    server_uri = "ws://your.esp32.server.ip:port"
+    server_uri = "ws://192.168.0.110/ws"
     
     await receive_and_send_data(server_uri)
 

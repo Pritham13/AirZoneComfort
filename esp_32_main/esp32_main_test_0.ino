@@ -49,24 +49,27 @@ void setup() {
     telemetry_queue = xQueueCreate(5, sizeof(TelemetryData));
 
     if (telemetry_queue != NULL) {
-        xTaskCreate(Task_hum_temp_read,
+        xTaskCreatePinnedToCore(Task_hum_temp_read,
                     "collection_of_humidity_and_temperature_data",
-                    129,
+                    4096,
                     NULL,
                     1,
-                    NULL);
-        xTaskCreate(Task_value_display,
+                    NULL,
+                    0);
+        xTaskCreatePinnedToCore(Task_value_display,
                     "displaying_of_the_collected_values",
-                    129,
+                    4096,
                     NULL,
                     2,
-                    NULL);
-        xTaskCreate(Task_data_transmit,
-                    "Sending_the_value_to_the_ML_model",
-                    129,
                     NULL,
-                    3,
-                    NULL);
+                    0);
+        // xTaskCreatePinnedToCore(Task_data_transmit,
+        //             "Sending_the_value_to_the_ML_model",
+        //             4096,
+        //             NULL,
+        //             1,
+        //             NULL,
+        //             1);
     }
 }
 
