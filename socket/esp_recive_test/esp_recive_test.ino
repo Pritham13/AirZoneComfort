@@ -4,6 +4,9 @@
 #include <ESPAsyncWebSrv.h>
 const char* ssid = "Nope";
 const char* password = "pi314420";
+#define rmf 12
+#define rmb 13
+#define en 5
 typedef struct TelemetryData
 {
     float temperature;
@@ -15,8 +18,13 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 int flag =0;
 float count =28.4;
+int num;
 AsyncWebSocketClient *connectedClient = NULL;
-
+void fanSpeed_set(int speed){
+    analogWrite(en, speed*0.1*255);
+    digitalWrite(rmf, LOW);
+    digitalWrite(rmb, HIGH);
+}
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
   if (type == WS_EVT_CONNECT) {
     Serial.println("WebSocket client connected");
@@ -39,8 +47,8 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     for (size_t i = 0; i < len; i++) {
       Serial.print((char)data[i]);
     }
-    Serial.println();
-
+  Serial.println();
+  fanSpeed_set((int)data);
     // Process the received data here if needed
   }
 }
@@ -101,8 +109,8 @@ void loop() {
     // Send initial data to the client when connected
     if (flag) {
       int coreId = xPortGetCoreID();
-      // sendInitialData();
-      // Serial.println("data sent");
+      sendInitialData();
+      Serial.println("data sent");
       delay(1000);
     }
 }
