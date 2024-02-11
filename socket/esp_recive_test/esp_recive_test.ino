@@ -21,11 +21,9 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   if (type == WS_EVT_CONNECT) {
     Serial.println("WebSocket client connected");
     connectedClient = client;
-<<<<<<< HEAD
-    int coreId = xPortGetCoreID();
+      int coreId = xPortGetCoreID();
     Serial.printf("line on core %d\n", coreId);
-=======
->>>>>>> cb23603cc5f8e12ec0e5ccb40eeb3ebe60d101e9
+
 
     // Send initial data to the client when connected
     if (connectedClient != NULL) {
