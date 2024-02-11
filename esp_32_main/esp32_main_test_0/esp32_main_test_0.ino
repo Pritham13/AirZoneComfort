@@ -86,6 +86,8 @@ void fanSpeed_set(int speed){
 
 void displayTask(void *pvParameters) {
     TelemetryData data_acquired;
+    int coreId = xPortGetCoreID();
+        Serial.printf("data displaying on oled on core %d\n", coreId);
     for (;;) {
         // Read sensor data
         data_acquired.humidity = dht.readHumidity();
@@ -102,6 +104,8 @@ void displayTask(void *pvParameters) {
 
 void websocketTask(void *pvParameters) {
     TelemetryData receivedData;
+    int coreId = xPortGetCoreID();
+        Serial.printf("data sending on core %d\n", coreId);
     // char dataToSend[15];
     // char temperatureStr[4];
     // char humidityStr[3];
@@ -111,7 +115,7 @@ void websocketTask(void *pvParameters) {
         if (xQueueReceive(telemetryQueue, &receivedData, portMAX_DELAY) == pdTRUE) {
             // Format data
             snprintf(dataToSend, sizeof(dataToSend), "%.1f%02d%", receivedData.temperature, receivedData.humidity);
-            Serial.println(dataToSend);
+            // Serial.println(dataToSend);
             if (flag) {
                 connectedClient->text(dataToSend);
             }
@@ -126,9 +130,6 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     if (type == WS_EVT_CONNECT) {
         Serial.println("WebSocket client connected");
         connectedClient = client;
-        int coreId = xPortGetCoreID();
-        Serial.printf("line on core %d\n", coreId);
-
         if (connectedClient != NULL) {
             flag = 1;
         }
@@ -144,7 +145,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
         Serial.println();
         fanSpeed = data[0] - '0';
         fanSpeed_set(fanSpeed);
-        Serial.println(fanSpeed);
+        // Serial.println(fanSpeed);
     }
 }
 
@@ -177,10 +178,10 @@ void setup() {
     telemetryQueue = xQueueCreate(1, sizeof(TelemetryData));
 
     // Create displayTask
-    xTaskCreate(displayTask, "DisplayTask", 4096, NULL, 1, NULL);
+    xTaskCreatePinnedToCore(displayTask, "DisplayTask", 4096, NULL, 1, NULL,0);
 
     // Create websocketTask
-    xTaskCreate(websocketTask, "WebsocketTask", 4096, NULL, 1, NULL);
+    xTaskCreatePinnedToCore(websocketTask, "WebsocketTask", 4096, NULL, 1, NULL,1);
 }
 
 void loop() {
