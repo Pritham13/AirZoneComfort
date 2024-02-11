@@ -211,6 +211,13 @@ void Task_data_transmit(void *pvParameters) {
 
         // Receive data from the queue
         if (xQueueReceive(telemetry_send_queue, &data_acquired, portMAX_DELAY)) {
+          if (connectedClient != NULL) {
+            // if (count == 30.0){
+            //       count = 28.5;
+            //     }
+            //     TelemetryData data_acquired;
+            // data_acquired.humidity = (count + 1) * 10;
+            // data_acquired.temperature = count + 1;
             // Serial.print("temp int ");
             // Serial.println(data_acquired.humidity);
             char temperatureStr[10];
