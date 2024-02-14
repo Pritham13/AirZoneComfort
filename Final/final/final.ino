@@ -1,4 +1,4 @@
-#include <Arduino_FreeRTOS.h>
+// #include <Arduino_FreeRTOS.h>
 #include "DHT.h"
 #include <Wire.h>
 #include <Adafruit_BMP085.h>
@@ -8,23 +8,23 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebSrv.h>
 
-// Sensor objects
-Adafruit_BMP085 bmp; // Barometric Pressure and Temperature Sensor
-DHT dht(DHTPIN, DHTTYPE); // DHT11 Temperature and Humidity Sensor
 
 // Pin definitions
 #define DHTPIN 4   
 #define DHTTYPE DHT11
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define rmf 12
-#define rmb 13
+#define rmf 18
+#define rmb 19
 #define en 5
 #define seaLevelPressure_hPa 1013.25
+// Sensor objects
+Adafruit_BMP085 bmp; // Barometric Pressure and Temperature Sensor
+DHT dht(DHTPIN, DHTTYPE); // DHT11 Temperature and Humidity Sensor
 
 // WiFi credentials
-const char* ssid = "Nope";
-const char* password = "pi314420";
+const char* ssid = "moto_g54";
+const char* password = "prit4102";
 
 // Global variables
 int fanSpeed = 0;
@@ -92,13 +92,33 @@ void displayData(const TelemetryData &data) {
 
 // Function to set fan speed
 void fanSpeed_set(int speed){
-    analogWrite(en, speed*0.1*255);
+    int final;
+    switch(speed){
+      case  0:final = 0;
+            break;
+      case  1:final = 155;
+            break;
+      case  2:final = 186;
+            break;
+      case  3:final = 217;
+            break;
+      case  4:final = 248;
+            break;
+      case  5:final = 255;
+            break;
+
+    }
+    
+    analogWrite(en,final);
+    Serial.println(final);
     digitalWrite(rmf, LOW);
     digitalWrite(rmb, HIGH);
 }
 
 // Task to display sensor data on OLED
 void displayTask(void *pvParameters) {
+    int coreId = xPortGetCoreID();
+    Serial.printf("data sending on core %d\n", coreId);
     TelemetryData data_acquired;
     for (;;) {
         // Read sensor data
@@ -116,6 +136,8 @@ void displayTask(void *pvParameters) {
 
 // Task to handle WebSocket communication
 void websocketTask(void *pvParameters) {
+    int coreId = xPortGetCoreID();
+    Serial.printf("data sending on core %d\n", coreId);
     TelemetryData receivedData;
     char dataToSend[15];
     for (;;) {
@@ -148,12 +170,17 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     } else if (type == WS_EVT_DATA) {
         // Data received from WebSocket client
         fanSpeed = data[0] - '0';
+        Serial.print("fanspeeed:");
+        Serial.println(fanSpeed);
         fanSpeed_set(fanSpeed);
     }
 }
 
 // Setup function
 void setup() {
+    pinMode(en,OUTPUT);
+    pinMode(rmb,OUTPUT);
+    pinMode(rmf,OUTPUT);
     // Initialize sensors
     if (!bmp.begin()) {
         Serial.println("BMP180 Not Found. CHECK CIRCUIT!");
