@@ -64,6 +64,7 @@ async def receive_and_send_data(uri):
 
 async def main():
     server_uri = "ws://192.168.12.163/ws"
+    # server_uri = "ws://192.168.0.110/ws/"
     
     while True:
         await receive_and_send_data(server_uri)

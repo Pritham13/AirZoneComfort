@@ -1,3 +1,5 @@
+
+
 // #include <Arduino_FreeRTOS.h>
 #include "DHT.h"
 #include <Wire.h>
@@ -23,10 +25,10 @@ Adafruit_BMP085 bmp; // Barometric Pressure and Temperature Sensor
 DHT dht(DHTPIN, DHTTYPE); // DHT11 Temperature and Humidity Sensor
 
 // WiFi credentials
-const char* ssid = "moto_g54";
-const char* password = "prit4102";
-// const char* ssid = "Nope";
-// const char* password = "pi314420";
+// const char* ssid = "moto_g54";
+// const char* password = "prit4102";
+const char* ssid = "Nope";
+const char* password = "pi314420";
 
 // Global variables
 int fanSpeed = 0;
@@ -50,7 +52,7 @@ typedef struct TelemetryData
 } TelemetryData;
 
 // Queue to store telemetry data
-QueueHandle_t telemetryQueue;
+QueueHandle_t telemetryQueue,DisplayQueue;
 
 // Function to display sensor data on OLED
 void displayData(const TelemetryData &data) {
@@ -124,18 +126,37 @@ void displayTask(void *pvParameters) {
     TelemetryData data_acquired;
     for (;;) {
         // Read sensor data
-        data_acquired.humidity = dht.readHumidity();
-        data_acquired.temperature = bmp.readTemperature();
-        data_acquired.pressure = bmp.readPressure() / 100;
+        // data_acquired.humidity = dht.readHumidity();
+        // data_acquired.temperature = bmp.readTemperature();
+        // data_acquired.pressure = bmp.readPressure() / 100;
         // Display sensor data on OLED
-        displayData(data_acquired);
-        // Send data to the queue
-        xQueueSend(telemetryQueue, &data_acquired, portMAX_DELAY);
+         if (xQueueReceive(DisplayQueue, &data_acquired, portMAX_DELAY) == pdTRUE){
+                displayData(data_acquired);
+         }
+
+        
+        
         // Wait for 1000ms
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
-
+// Task to handle collection of data
+void CollectTask(void *pvParameters) {
+    int coreId = xPortGetCoreID();
+    Serial.printf("data Collecting on core %d\n", coreId);
+    TelemetryData data_acquired;
+    for (;;) {
+        // Read sensor data
+        data_acquired.humidity = dht.readHumidity();
+        data_acquired.temperature = bmp.readTemperature();
+        data_acquired.pressure = bmp.readPressure() / 100;
+        // Send data to the queue
+        xQueueSend(telemetryQueue, &data_acquired, portMAX_DELAY);
+        xQueueSend(DisplayQueue, &data_acquired, portMAX_DELAY);
+        // Wait for 1000ms
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
 // Task to handle WebSocket communication
 void websocketTask(void *pvParameters) {
     int coreId = xPortGetCoreID();
@@ -216,9 +237,11 @@ void setup() {
 
     // Create telemetryQueue
     telemetryQueue = xQueueCreate(1, sizeof(TelemetryData));
+    DisplayQueue = xQueueCreate(1, sizeof(TelemetryData));
 
     // Create displayTask
     xTaskCreatePinnedToCore(displayTask, "DisplayTask", 4096, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(collectTask, "CollectTask", 4096, NULL, 1, NULL, 0);
 
     // Create websocketTask
     xTaskCreatePinnedToCore(websocketTask, "WebsocketTask", 4096, NULL, 1, NULL, 1);
