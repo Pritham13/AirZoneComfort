@@ -3,6 +3,7 @@
 ## Project Description
 The Smart HVAC system is designed to adjust fan speed based on real-time data such as temperature and humidity using a custom-built machine learning model. The system consists of hardware components for data collection and display, as well as software components for data transmission and fan speed control.
 
+Note: The clinet file is client.py and the ESP32 file is final_server.ino both are under the folder names final
 ## Hardware Components
 - **BMP180**: Used for measuring temperature and barometric pressure.
 - **DHT11**: Used for measuring temperature and humidity.
@@ -40,11 +41,12 @@ To ensure future scalability and adaptability, the Smart HVAC system can explore
    - Read temperature and humidity data from BMP180 and DHT11 sensors.
    - Collect real-time data including current time, humidity, and temperature.
    - Display the collected data on the OLED screen.
-
+   - This Runs on Core 0 of the ESP32
 ### 2. Data Transmission
    - ESP32 sets up a WebSocket server.
    - Laptop (client) connects to the WebSocket server.
    - ESP32 sends temperature and humidity data to the laptop through the WebSocket connection.
+   - This runs on Core 1 of the ESP32
 
 ### 3. Machine Learning Model
    - Laptop receives temperature and humidity data from ESP32.
