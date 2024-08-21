@@ -1,4 +1,4 @@
-# Smart HVAC System Project Overview
+# AirZone Comfort Project Overview
 
 ## Project Description
 The Smart HVAC system is designed to adjust fan speed based on real-time data such as temperature and humidity using a custom-built machine learning model. The system consists of hardware components for data collection and display, as well as software components for data transmission and fan speed control.
