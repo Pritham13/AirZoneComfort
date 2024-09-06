@@ -1,7 +1,7 @@
 # AirZone Comfort Project Overview
 
 ## Project Description
-The Smart HVAC system is designed to adjust fan speed based on real-time data such as temperature and humidity using a custom-built machine learning model. The system consists of hardware components for data collection and display, as well as software components for data transmission and fan speed control.
+The system is designed to adjust fan speed based on real-time data such as temperature and humidity using a custom-built machine learning model. The system consists of hardware components for data collection and display, as well as software components for data transmission and fan speed control.
 
 Note: The clinet file is client.py and the ESP32 file is final_server.ino both are under the folder names final
 ## Hardware Components
